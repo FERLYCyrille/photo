@@ -3,13 +3,13 @@ import { Copy, Lock, Globe } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function ShareRevealPage() {
+    const baseUrl = import.meta.env.VITE_APP_URL;
 
     const location = useLocation();
     const { photo, publicLink, privateLink } = location.state || {};
 
-    const fullPublicLink = `${window.location.origin}/reveal/${publicLink}`;
-    const fullPrivateLink = `${window.location.origin}/dashboard/${privateLink}`;
-
+    const fullPublicLink = `${baseUrl}/reveal/${publicLink}`;
+    const fullPrivateLink = `${baseUrl}/dashboard/${privateLink}`;
     const copyToClipboard = async (link) => {
         try {
             await navigator.clipboard.writeText(link);
