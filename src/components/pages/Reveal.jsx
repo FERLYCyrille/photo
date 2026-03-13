@@ -20,6 +20,7 @@ export default function RevealPage() {
     const audioChunksRef = useRef([]);
     const streamRef = useRef(null);
     const timerRef = useRef(null);
+    const mimeTypeRef = useRef("audio/webm");
 
     useEffect(() => {
         if (publicLink) fetchPost();
@@ -67,15 +68,29 @@ export default function RevealPage() {
         }
     };
 
-    const startRecording = async () => {
+    const getSupportedMimeType = () => {
+        const types = [
+            "audio/webm;codecs=opus",
+            "audio/webm",
+            "audio/mp4",
+            "audio/ogg;codecs=opus",
+            "audio/ogg",
+        ];
+        return types.find((t) => MediaRecorder.isTypeSupported(t)) || "";
+    };
+
+    const startRecording = async (e) => {
+        e.preventDefault();
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
             streamRef.current = stream;
 
-            const recorder = new MediaRecorder(stream, {
-                mimeType: "audio/webm;codecs=opus"
-            });
+            const mimeType = getSupportedMimeType();
+            mimeTypeRef.current = mimeType;
+
+            const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
 
             mediaRecorderRef.current = recorder;
             audioChunksRef.current = [];
@@ -115,16 +130,23 @@ export default function RevealPage() {
             return;
         }
 
-        try {
-            const blob = new Blob(audioChunksRef.current, {
-                type: "audio/webm;codecs=opus"
-            });
+        // On attend que le recorder ait fini d'écrire les chunks
+        await new Promise((resolve) => {
+            mediaRecorderRef.current.onstop = resolve;
+        });
 
-            const fileName = `${Date.now()}.webm`;
+        try {
+            const mimeType = mimeTypeRef.current || "audio/webm";
+            const ext = mimeType.includes("mp4") ? "mp4"
+                : mimeType.includes("ogg") ? "ogg"
+                    : "webm";
+
+            const blob = new Blob(audioChunksRef.current, { type: mimeType });
+            const fileName = `${Date.now()}.${ext}`;
 
             await supabase.storage
                 .from("audio")
-                .upload(fileName, blob);
+                .upload(fileName, blob, { contentType: mimeType });
 
             const { data } = supabase.storage
                 .from("audio")
@@ -214,8 +236,7 @@ export default function RevealPage() {
             {/* Audio recorder */}
             {!recording && (
                 <button
-                    onMouseDown={startRecording}
-                    onTouchStart={startRecording}
+                    onPointerDown={startRecording}
                     className="w-full max-w-md flex items-center justify-center gap-2 py-4 rounded-xl bg-purple-700"
                 >
                     <Mic size={18} />
@@ -229,16 +250,10 @@ export default function RevealPage() {
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                         {formatTime(time)}
                     </div>
-                    <button
-                        onClick={() => stopRecording(false)}
-                        className="text-red-400"
-                    >
+                    <button onClick={() => stopRecording(false)} className="text-red-400">
                         <Trash2 size={18} />
                     </button>
-                    <button
-                        onClick={() => stopRecording(true)}
-                        className="text-green-400"
-                    >
+                    <button onClick={() => stopRecording(true)} className="text-green-400">
                         <Send size={18} />
                     </button>
                 </div>
