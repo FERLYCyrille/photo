@@ -8,7 +8,7 @@ export default function ShareRevealPage() {
     const location = useLocation();
     const { photo, publicLink, privateLink } = location.state || {};
 
-    const fullPublicLink = `${baseUrl}/reveal/${publicLink}`;
+    const fullPublicLink = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-preview?id=${publicLink}`;
     const fullPrivateLink = `${baseUrl}/dashboard/${privateLink}`;
     const copyToClipboard = async (link) => {
         try {
