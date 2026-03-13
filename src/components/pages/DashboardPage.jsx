@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../../../supabaseClient";
 import toast from "react-hot-toast";
-import { Play, Pause, ChevronLeft, MoreVertical, Mic, MessageCircle } from "lucide-react";
+import { Play, Pause, MoreVertical, Mic, MessageCircle } from "lucide-react";
 
 const styleTag = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
@@ -45,32 +45,49 @@ function WaveformBar({ height, active, playing, index }) {
     );
 }
 
-function VoiceMessage({ duration, waveform, audioUrl }) {
+function VoiceMessage({ waveform, audioUrl }) {
     const [playing, setPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [duration, setDuration] = useState("--:--");
     const audioRef = useRef(null);
 
     useEffect(() => {
-        if (audioUrl) audioRef.current = new Audio(audioUrl);
-        return () => audioRef.current?.pause();
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        audio.onloadedmetadata = () => {
+            const m = Math.floor(audio.duration / 60);
+            const s = Math.floor(audio.duration % 60);
+            setDuration(`${m}:${s.toString().padStart(2, "0")}`);
+        };
+
+        audio.ontimeupdate = () => {
+            const p = (audio.currentTime / audio.duration) * 100;
+            setProgress(isNaN(p) ? 0 : p);
+        };
+
+        audio.onended = () => {
+            setPlaying(false);
+            setProgress(0);
+        };
+
+        return () => {
+            audio.pause();
+            audio.src = "";
+        };
     }, [audioUrl]);
 
     const togglePlay = () => {
         if (!audioRef.current) return;
         if (!playing) {
             audioRef.current.play();
-            audioRef.current.ontimeupdate = () => {
-                const p = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-                setProgress(isNaN(p) ? 0 : p);
-            };
-            audioRef.current.onended = () => { setPlaying(false); setProgress(0); };
         } else {
             audioRef.current.pause();
         }
         setPlaying(!playing);
     };
 
-    const activeCount = Math.floor((progress / 100) * waveform.length) || Math.floor(waveform.length / 2);
+    const activeCount = Math.floor((progress / 100) * waveform.length);
 
     return (
         <div
@@ -92,11 +109,13 @@ function VoiceMessage({ duration, waveform, audioUrl }) {
                     : <Play size={14} fill="white" color="white" style={{ marginLeft: 2 }} />
                 }
             </button>
+
             <div className={`flex items-center gap-[2px] flex-1 ${playing ? "waveform-playing" : ""}`}>
                 {waveform.map((h, i) => (
                     <WaveformBar key={i} height={h} active={i < activeCount} playing={playing} index={i} />
                 ))}
             </div>
+
             <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
                 <Mic size={10} color="rgba(255,255,255,0.5)" />
                 <span className="text-[10px] text-white/60">{duration}</span>
@@ -157,15 +176,20 @@ export default function SecretInboxPage() {
                 .select("*")
                 .eq("private_link", privateLink)
                 .single();
+
             if (!post) return setLoading(false);
+
             setPhoto(post.photo_url);
+
             const { data: commentsData } = await supabase
                 .from("comments")
                 .select("*")
                 .eq("post_id", post.id)
                 .order("created_at", { ascending: false });
+
             setComments(commentsData || []);
-        } catch (err) {
+
+        } catch {
             toast.error("Impossible de charger les commentaires.");
         } finally {
             setLoading(false);
@@ -194,7 +218,7 @@ export default function SecretInboxPage() {
                     position: "relative",
                 }}>
 
-                    {/* Header G Genial */}
+                    {/* Header */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 12px", position: "relative", zIndex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ width: 36, height: 36, borderRadius: 12, background: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -258,7 +282,7 @@ export default function SecretInboxPage() {
                                 <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
                                     <Avatar />
                                     {msg.audio_url ? (
-                                        <VoiceMessage duration="0:15" waveform={waveformData} audioUrl={msg.audio_url} />
+                                        <VoiceMessage waveform={waveformData} audioUrl={msg.audio_url} />
                                     ) : (
                                         <TextMessage text={msg.message} />
                                     )}
@@ -271,6 +295,7 @@ export default function SecretInboxPage() {
                             </div>
                         )}
                     </div>
+
                 </div>
             </div>
         </>

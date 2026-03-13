@@ -27,7 +27,6 @@ export default function RevealPage() {
 
     const fetchPost = async () => {
         try {
-
             const { data } = await supabase
                 .from("posts")
                 .select("*")
@@ -50,11 +49,9 @@ export default function RevealPage() {
     };
 
     const sendComment = async () => {
-
         if (!message) return;
 
         try {
-
             await supabase
                 .from("comments")
                 .insert({
@@ -63,7 +60,6 @@ export default function RevealPage() {
                 });
 
             setMessage("");
-
             toast.success("Message envoyé");
 
         } catch {
@@ -72,9 +68,7 @@ export default function RevealPage() {
     };
 
     const startRecording = async () => {
-
         try {
-
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
             streamRef.current = stream;
@@ -84,7 +78,6 @@ export default function RevealPage() {
             });
 
             mediaRecorderRef.current = recorder;
-
             audioChunksRef.current = [];
 
             recorder.ondataavailable = (event) => {
@@ -108,13 +101,11 @@ export default function RevealPage() {
     };
 
     const stopRecording = async (send = true) => {
-
         clearInterval(timerRef.current);
 
         if (!mediaRecorderRef.current) return;
 
         mediaRecorderRef.current.stop();
-
         streamRef.current.getTracks().forEach((t) => t.stop());
 
         setRecording(false);
@@ -125,7 +116,6 @@ export default function RevealPage() {
         }
 
         try {
-
             const blob = new Blob(audioChunksRef.current, {
                 type: "audio/webm;codecs=opus"
             });
@@ -171,7 +161,6 @@ export default function RevealPage() {
     }
 
     return (
-
         <div className="min-h-screen bg-[#0b0416] text-white flex flex-col items-center px-6 py-6 gap-6">
 
             {/* Header */}
@@ -236,26 +225,22 @@ export default function RevealPage() {
 
             {recording && (
                 <div className="w-full max-w-md flex items-center justify-between bg-[#1a0f2e] px-4 py-3 rounded-xl">
-
                     <div className="flex items-center gap-2 text-red-400">
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                         {formatTime(time)}
                     </div>
-
                     <button
                         onClick={() => stopRecording(false)}
                         className="text-red-400"
                     >
                         <Trash2 size={18} />
                     </button>
-
                     <button
                         onClick={() => stopRecording(true)}
                         className="text-green-400"
                     >
                         <Send size={18} />
                     </button>
-
                 </div>
             )}
 
