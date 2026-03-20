@@ -4,6 +4,7 @@ import { supabase } from "../../../supabaseClient";
 import toast from "react-hot-toast";
 import { Play, Pause, MoreVertical, Mic, MessageCircle } from "lucide-react";
 import { Howl } from "howler";
+import { Link } from "react-router-dom";
 
 const styleTag = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
@@ -246,9 +247,9 @@ export default function SecretInboxPage() {
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "52px 20px 12px", position: "relative", zIndex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ width: 36, height: 36, borderRadius: 12, background: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <span style={{ fontWeight: 700, color: "white" }}>G</span>
+                                <span style={{ fontWeight: 700, color: "white" }}> <Link to="/">G</Link></span>
                             </div>
-                            <span style={{ fontWeight: 600, color: "white", fontSize: 16 }}>Genial</span>
+                            <span style={{ fontWeight: 600, color: "white", fontSize: 16 }}> <Link to="/">Genial</Link></span>
                         </div>
                         <button style={{ width: 36, height: 36, borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                             <MoreVertical size={18} color="rgba(255,255,255,0.8)" />

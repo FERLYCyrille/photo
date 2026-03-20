@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../supabaseClient";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { Flame, Heart, Laugh, Send, Mic, Trash2 } from "lucide-react";
 
 export default function RevealPage() {
@@ -189,9 +190,9 @@ export default function RevealPage() {
             <div className="w-full max-w-md flex items-center mb-4">
                 <div className="flex items-center gap-2">
                     <div className="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center">
-                        <span className="text-lg font-bold">G</span>
+                        <span className="text-lg font-bold"> <Link to="/">G</Link></span>
                     </div>
-                    <span className="font-semibold text-lg">Genial</span>
+                    <span className="font-semibold text-lg"> <Link to="/">Genial</Link></span>
                 </div>
             </div>
 
