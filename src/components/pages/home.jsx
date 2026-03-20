@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Camera, Upload } from "lucide-react";
 import { supabase } from "../../../supabaseClient";
-
+import { Link } from "react-router-dom";
 // ---------- Carousel Component ----------
 const slides = [
     {
@@ -121,9 +121,9 @@ export default function LandingPage() {
             <div className="w-full max-w-md flex items-center mb-8">
                 <div className="flex items-center gap-2">
                     <div className="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center">
-                        <span className="text-lg">G</span>
+                        <span className="text-lg"> <Link to="/">G</Link></span>
                     </div>
-                    <span className="font-semibold text-lg">Genial</span>
+                    <span className="font-semibold text-lg"> <Link to="/">Genial</Link></span>
                 </div>
             </div>
 
